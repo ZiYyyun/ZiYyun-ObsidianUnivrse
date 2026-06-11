@@ -1,0 +1,22 @@
+# Ignore Obsidian workspace and plugin data
+.obsidian/
+
+# Ignore trash and attachments
+.trash/
+Attachments/
+
+# Ignore large book and binary files
+*/Books/
+*.pdf
+*.epub
+*.mobi
+*.7z
+*.zip
+
+# Ignore pasted images from Obsidian
+Pasted image*.png
+
+# Node / Python / Editor
+venv/
+__pycache__/
+*.pyc
