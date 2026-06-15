@@ -1,10 +1,15 @@
 filters:
   and:
-    - file.hasLink("步进电机")
+    - file.tags.contains("实操/开发/嵌入式/STM32/项目/步进电机")
 views:
   - type: table
     name: 表格
-    filters:
-      and:
-        - file.tags.isEmpty()
-    sort: []
+    order:
+      - file.name
+      - file.ctime
+      - file.size
+    sort:
+      - property: file.tags
+        direction: DESC
+      - property: file.name
+        direction: DESC
