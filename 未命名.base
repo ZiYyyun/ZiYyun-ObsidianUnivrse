@@ -1,0 +1,10 @@
+filters:
+  and:
+    - file.hasLink("步进电机")
+views:
+  - type: table
+    name: 表格
+    filters:
+      and:
+        - file.tags.isEmpty()
+    sort: []
