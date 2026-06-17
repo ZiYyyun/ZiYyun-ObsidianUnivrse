@@ -1,4 +1,4 @@
-#Prot 
+#理论/嵌入式  #Prot  #MQTT
 
 MQTT（Message Queuing Telemetry Transport）本质上是一个基于发布-订阅模式（Publish/Subscribe）的轻量级通信协议.专门为低宽带高延时网络设计
 

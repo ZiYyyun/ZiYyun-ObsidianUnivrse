@@ -1,4 +1,4 @@
-#理论/嵌入式 
+#理论/嵌入式 #Prot  #SPI
 
 > SPI（Serial Peripheral Interface）是一种同步串行通信协议，用于主设备与外设之间的高速数据传输。它由四条信号线构成
 
