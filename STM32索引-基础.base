@@ -1,3 +1,7 @@
+filters:
+  or:
+    - file.tags.contains("实操/开发/嵌入式/STM32")
+    - file.tags.contains("理论/开发/嵌入式/STM32")
 views:
   - type: table
     name: 表格

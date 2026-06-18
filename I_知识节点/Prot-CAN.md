@@ -2,7 +2,6 @@
 
 
 
-
 ### 数据格式
 
 | 类型    | Identifier | IDE | RTR | DATA | 用途   |
@@ -36,6 +35,29 @@
 - `Ack`：确认位
 - `EOF(End of Frame)`：结束
 
+
+### 通讯时序
+
+> [!NOTE] CAN的时间单位
+> ![[Pasted image 20260618115131.png]]
+> ```
+> │ Sync │────────BS1────────│采样│────BS2────│结束
+> ```
+> 在CAN总线中：
+> ```
+> 1Bit = Sync + BS1 + BS2
+> ```
+> 其中，这个`Sync`固定是1TQ，所以我们只需要配置`BS1`和`BS2`
+> 
+
+`BS1`代表：**数据结束之前的时间**，所以CAN真正读取数据，是从==`BS1`结束开始的。==
+`BS2`主要的作用是给`Sync`留时间，所以通常要配置地小于`BS1`
+#### 时间量子（TQ）
+
+#### 采样点
+
+
+
 #### 远程帧
 ```
 ┌────┬────────┬────┬────┬────┬────┬──────┬────┬────┐
@@ -52,27 +74,6 @@
 > ID也可以决定优先级，ID越小优先级越高
 > CAN有两种ID：11bit的标准帧和29bit的扩展帧（汽车常用）
 
-
-
-### 配置流程
-
-```
-初始化CAN
-
-设置波特率
-
-配置过滤器
-
-启动CAN
-
-打开RX中断
-
-收到消息
-
-读取FIFO
-
-解析Data
-```
 
 ### 主要函数
 #### 发送数据
@@ -111,14 +112,58 @@ CAN总线
 
 #### 接收数据
 
+```
+CAN总线
+   │
+   ▼
+CAN控制器
+   │
+   ▼
+过滤器(Filter)
+   │
+   ▼
+FIFO0 或 FIFO1
+   │
+   ▼
+HAL_CAN_GetRxMessage()
+   │
+   ▼
+你的变量
+```
+
+
+
+#### 过滤器（Filter）
+CAN最大的特性之一就是选择性读取，这个功能是由过滤器实现的。F103有14个过滤器
+
+```c
+CAN_FilterTypeDef filter;
+```
+通过给这个结构体的成员赋值来配置过滤器
+
+| 字段                     | 作用                         |
+| ---------------------- | -------------------------- |
+| `FilterBank`           | 使用第几个过滤器                   |
+| `FilterFIFOAssignment` | 通过后送到哪个 FIFO               |
+| `FilterMode`           | **按掩码匹配**还是**按列表匹配**       |
+| `FilterScale`          | 使用 **16 位模式**还是 **32 位模式** |
+| `FilterIdHigh/Low`     | 要匹配的 ID 值（按寄存器格式编码）        |
+| `FilterMaskIdHigh/Low` | 掩码，用来决定哪些位参与比较             |
+> Filter的配置函数
+
+```c
+HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig)
+```
+
+#### FIFO
 接收函数与发送的逻辑完全不一样，在接收数据时，主控可能在做其他事情，此时就算中断也还是会丢数据，因为CAN总线的所以需要一个缓冲区，这个缓冲区便是`FIFO(First in First Out)`
 ```
 ┌──────────┐
-│ Frame1   │
+│ Frame1   │    ← 最早
 ├──────────┤
 │ Frame2   │
 ├──────────┤
-│ Frame3   │
+│ Frame3   │    ← 最新
 └──────────┘
 ```
 特别的是，STM32提供两个FIFO：`FIFO0` 和 `FIFO1`。过滤器将会决定数据接收到哪个。
@@ -151,6 +196,9 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
 | uint8_t CAN_GetFIFOStatus(CAN_TypeDef* CANx, uint8_t FIFO_Flag)            | 查询 FIFO0/FIFO1 当前缓存帧数        | 0/1/2/3     | 判断 FIFO 存了几帧报文，预判溢出     |
 | FlagStatus CAN_GetFIFOOverflowStatus(CAN_TypeDef* CANx, uint8_t FIFO_Flag) | 查询 FIFO 溢出标志                 | SET = 溢出丢帧  | 检测高速报文覆盖旧数据             |
 | FlagStatus CAN_GetFIFOFullStatus(CAN_TypeDef* CANx, uint8_t FIFO_Flag)     | 查询 FIFO 已满（3 帧）              | SET=FIFO 塞满 | 提前预警即将溢出                |
+
+
+
 
 
 

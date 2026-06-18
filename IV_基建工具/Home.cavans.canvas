@@ -1,69 +1,8 @@
 {
 	"nodes":[
-		{
-			"id":"c79cf7be0b0bf2a8",
-			"type":"text",
-			"text":"🛠 项目库",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-230,
-			"y":-280,
-			"width":260,
-			"height":200,
-			"color":"4"
-		},
-		{
-			"id":"553cbe548d040f8a",
-			"type":"text",
-			"text":"📚 知识库",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-540,
-			"y":-280,
-			"width":260,
-			"height":200,
-			"color":"#5574d3"
-		},
-		{
-			"id":"bc1e1de21f48b882",
-			"type":"text",
-			"text":"📖资源库",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-280,
-			"width":260,
-			"height":200,
-			"color":"6"
-		},
-		{
-			"id":"a7937a6070508337",
-			"type":"text",
-			"text":"## 🔥 Current Focus\n\n```dataview\nLIST\nFROM \"\"\nSORT file.mtime DESC\nLIMIT 5\n```",
-			"styleAttributes":{},
-			"x":0,
-			"y":-700,
-			"width":260,
-			"height":220
-		},
-		{
-			"id":"4e1b37aaef50183f",
-			"type":"text",
-			"text":"🗓日记",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-280,
-			"y":-520,
-			"width":260,
-			"height":200,
-			"color":"3"
-		},
-		{
-			"id":"0453d8cc58920b08",
-			"type":"text",
-			"text":"## 📌 Tasks\n\n```tasks\nnot done\nlimit 5\n```\n",
-			"styleAttributes":{},
-			"x":-280,
-			"y":-980,
-			"width":260,
-			"height":420
-		}
+		{"id":"f91e3756873c556b","type":"file","file":"索引/STM32-索引.md","x":-820,"y":-820,"width":500,"height":500},
+		{"id":"7ae3c4db1a4d65d0","type":"file","file":"索引/嵌入式操作系统-索引.md","x":-240,"y":-820,"width":520,"height":500},
+		{"id":"ee71fe4a01fa1570","type":"file","file":"索引/嵌入式-索引.md","x":-820,"y":-1300,"width":400,"height":400}
 	],
 	"edges":[],
 	"metadata":{

@@ -10,7 +10,7 @@
 >当硬件触发中断时，CPU 会跳转到一个固定的入口函数。这个函数通常放在 `stm32f1xx_it.c`（中断服务文件）中。它的唯一工作就是**清理中断标志位**，然后把活儿交给 HAL 库的回调函数。
 
 ```c
-	void EXTI0_IRQHandler(void) 
+void EXTI0_IRQHandler(void) 
 { 
 	HAL_GPIO_EXTI_IRQHandler(KEY1_Pin);
 }

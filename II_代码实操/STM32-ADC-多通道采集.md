@@ -46,7 +46,7 @@ ADC1->CR2 |= (ADC_CR2_EXTTRIG | ADC_CR2_EXTSEL);
 
 >设置转换结果对齐方式
 ```c
-ADC1->CR2 &=~ ADC_CR2_ALIGN ;
+ADC1->CR2 &=~ ADC_CR2_ALIGN;
 ```
 
 >开启[[RM0008中文参考手册.pdf#page=174&selection=连续转换|连续转换]]模式和[[RM0008中文参考手册.pdf#page=174&selection=直接存储器访问模式|直接存储器访问模式]]

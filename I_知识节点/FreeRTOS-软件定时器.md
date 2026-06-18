@@ -1,4 +1,4 @@
-#理论/嵌入式/FreeRTOS 
+#理论/嵌入式/FreeRTOS    #FreeRTOS 
 FreeRTOS 中的软件定时器是一种不占用硬件定时器资源，而是由内核守护任务（Daemon Task）基于系统滴答（SysTick）统一调度，在指定时间到达后自动执行回调函数的轻量级定时机制
 
 ---

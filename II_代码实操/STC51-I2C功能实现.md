@@ -91,7 +91,6 @@ u8 Dri_IIC_ReceiveByte()
 参考：[[Prot-IIC#结束]]
 ```c
 void Dri_IIC_Stop()
-
 {
     SDA = 0;
     SCL = 1;

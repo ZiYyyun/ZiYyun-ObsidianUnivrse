@@ -1,0 +1,10 @@
+filters:
+  and:
+    - file.tags.contains("Prot")
+views:
+  - type: table
+    name: 表格
+    order:
+      - file.name
+      - file.ctime
+      - file.size

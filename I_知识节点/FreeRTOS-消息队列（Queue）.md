@@ -1,4 +1,4 @@
-#理论/嵌入式/FreeRTOS 
+#理论/嵌入式/FreeRTOS    #FreeRTOS 
 前面学到了`xTaskNotifyTake()`一系列函数，它们只能实现“通知”的效果，但是不能传递数据。于是我们就有Queue消息队列
 
 ---

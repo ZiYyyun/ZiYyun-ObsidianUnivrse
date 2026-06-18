@@ -1,4 +1,4 @@
-#理论/开发/嵌入式 
+#理论/嵌入式/STM32  
 
 **FSMC**（Flexible Static Memory Controller），**灵活静态存储控制器**，是 STM32 的片上外设，用来**高效外接各类静态存储器与并行外设**。
 
