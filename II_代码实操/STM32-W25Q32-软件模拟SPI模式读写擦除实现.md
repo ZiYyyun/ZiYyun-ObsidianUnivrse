@@ -27,7 +27,7 @@ Dri_SPI_SwapByte(0x05);
 while( Dri_SPI_SwapByte(0x00) & 0x01 );
 ```
 > [!PDF]
-> [[III_资源仓库/Data_SHOUCE/C179173_NOR+FLASH_W25Q32JVSSIQ_规格书_WJ323642.PDF#page=27&selection=The BUSY bit is a 1 during the Write Status Register cycle and a 0 when the cycle is finished and ready to accept other instructions again. |C179173_NOR+FLASH_W25Q32JVSSIQ_规格书_WJ323642 第27页]]
+> [[winbond-W25Q32JVSSIQ_datasheet_WJ323642.pdf#page=27&selection=The BUSY bit is a 1 during the Write Status Register cycle and a 0 when the cycle is finished and ready to accept other instructions again.|C179173_NOR+FLASH_W25Q32JVSSIQ_规格书_WJ323642 第27页]]
 > 为什么要读`0x01`这个位呢？因为手册里有写，这个是`BUSY`位
 > The BUSY bit is a 1 during the Write Status Register cycle and a 0 when the cycle is finished and ready to accept other instructions again. 
 > 

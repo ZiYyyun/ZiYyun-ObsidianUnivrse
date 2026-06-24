@@ -23,7 +23,6 @@
 #### 写数据
 ```c
 void Dri_Write_SendByte(u8 byte){
-
 for (i = 0; i < 8; i++){
   u8 i = 0;
   
@@ -34,9 +33,6 @@ for (i = 0; i < 8; i++){
    
    byte >>= 1;
   }
-
-
  }
-
 }
 ```

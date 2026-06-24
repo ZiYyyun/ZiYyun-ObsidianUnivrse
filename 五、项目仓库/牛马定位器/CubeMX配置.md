@@ -12,7 +12,7 @@
 
 ### GPIO配置
 ![[Pasted image 20260521101607.png]]
-配置`PB5`引脚，由[[III_资源仓库/原理图/牛马定位器_原理图.pdf#page=1&selection=DS3553-CS|DS3553-原理图]]可知：该引脚为DS3553的CS引脚。
+配置`PB5`引脚，由[[SCH_牛马定位器_原理图.pdf#page=1&selection=DS3553-CS|DS3553-原理图]]可知：该引脚为DS3553的CS引脚。
 配置引脚默认高电平，参考DS3553的[[DS3553-编写手册.pdf#page=6&selection=通信条件：CS 拉低。|通信条件：CS 拉低。]]
 
 ### I2C
