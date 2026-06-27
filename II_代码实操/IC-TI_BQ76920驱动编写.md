@@ -32,7 +32,7 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
 查询数据手册，得到读寄存器的功能码[[TODO]]
 
 > [!Warning] 获取到的数据流
-> 由[[IC-TI_BQ7692003PWR#读寄存器]]可知，读取到的数据如下：
+> 由[[IC-TI_BQ769x0#读寄存器]]可知，读取到的数据如下：
 > ```
 > [数据0][CRC0] [数据1][CRC1] [数据2][CRC2]
 > ```
@@ -202,6 +202,7 @@ static void App_Battery_GetGainAndOffset(void)
 
 #### 获取温度
 	void App_battery_GetTemp(void)
+
 ```c
     // 读取温度寄存器
     uint8_t tmp_array[2] = {0};
@@ -245,13 +246,10 @@ static void App_Battery_GetGainAndOffset(void)
 
 > `Sys_CTRL1`寄存器
 ```c
-
     // 使用外部NTC测量电池温度
     bq_register.SysCtrl1.SysCtrl1Bit.TEMP_SEL = 1;
-  
     // 打开ADC
     bq_register.SysCtrl1.SysCtrl1Bit.ADC_EN = 1;
-  
     Int_BQ769_WriteRegister( BQ_SYS_CTRL1, bq_register.SysCtrl1.SysCtrl1Byte);
 ```
 
@@ -260,13 +258,10 @@ static void App_Battery_GetGainAndOffset(void)
 ```c
     // 开启库仑计（Charge Counter）
     bq_register.SysCtrl2.SysCtrl2Bit.CC_EN = 1;
-  
     // 允许充电MOS导通
     bq_register.SysCtrl2.SysCtrl2Bit.CHG_ON = 1;
-
     // 允许放电MOS导通
     bq_register.SysCtrl2.SysCtrl2Bit.DSG_ON = 1;
-
     Int_BQ769_WriteRegister( BQ_SYS_CTRL2, bq_register.SysCtrl2.SysCtrl2Byte);
 ```
 
@@ -276,13 +271,10 @@ static void App_Battery_GetGainAndOffset(void)
     // 1 -> 5mΩ
     // 0 -> 20mΩ
     bq_register.Protect1.Protect1Bit.RSNS = 1;
-
     // 短路保护阈值
     bq_register.Protect1.Protect1Bit.SCD_THRESH = 0x7;
-  
     // 短路保护延时
     bq_register.Protect1.Protect1Bit.SCD_DELAY = BMS_SCD_DELAY_400us;
-
     Int_BQ769_WriteRegister( BQ_PROTECT1, bq_register.Protect1.Protect1Byte);
 ```
 
@@ -291,10 +283,8 @@ static void App_Battery_GetGainAndOffset(void)
 ```c
     // 放电过流阈值
     bq_register.Protect2.Protect2Bit.OCD_THRESH = 0xF;
-
     // 放电过流延时
     bq_register.Protect2.Protect2Bit.OCD_DELAY = BMS_OCD_DELAY_1280ms;
-  
     Int_BQ769_WriteRegister( BQ_PROTECT2, bq_register.Protect2.Protect2Byte);
 ```
 
@@ -303,10 +293,8 @@ static void App_Battery_GetGainAndOffset(void)
 ```c
     // 欠压保护延时
     bq_register.Protect3.Protect3Bit.UV_DELAY = BMS_UV_DELAY_16s;
-
     // 过压保护延时
     bq_register.Protect3.Protect3Bit.OV_DELAY = BMS_OV_DELAY_8s;
-
     Int_BQ769_WriteRegister( BQ_PROTECT3, bq_register.Protect3.Protect3Byte);
 ```
 
@@ -353,15 +341,15 @@ static void App_Battery_GetGainAndOffset(void)
         │                                │
         ▼                                ▼
  Int_BQ769_Init()              读取 Gain / Offset
- (唤醒芯片、进入工作模式)              │
+ (唤醒芯片、进入工作模式)                   │
         │                                │
         └───────────────┬────────────────┘
                         ▼
                配置系统控制寄存器
           ┌─────────────────────────┐
           │ SYS_CTRL1               │
-          │ • 开启ADC               │
-          │ • 外部NTC测温           │
+          │ • 开启ADC                │
+          │ • 外部NTC测温            │
           └─────────────────────────┘
                         │
                         ▼

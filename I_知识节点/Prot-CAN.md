@@ -170,7 +170,7 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_Filter
 
 
 > [!NOTE] FIFO的内部
-> FIFO内部储存了一个完整的`Frame`，包括`ID``DLC``RTR``IDE``DATA`和`CRC`。等到CPU取出来之后，HAL库会帮我们拆成`CAN_RxHeaderTypeDef`和一个`uint8_t RxData[8]`
+> FIFO内部储存了一个完整的`Frame`，包括`ID` `DLC` `RTR` `IDE` `DATA` 和`CRC`。等到CPU取出来之后，HAL库会帮我们拆成`CAN_RxHeaderTypeDef`和一个`uint8_t RxData[8]`
 
 
 
