@@ -24,23 +24,6 @@
 | 均衡方式             | 内部MOS + 外部电阻（被动均衡），电流极小       |
 | 温度通道             | 内部die温度 + 最多3个外部NTC (TS1/TS2) |
 
-### 引脚定义
-| 引脚  | 名称     | 说明                                  |
-| --- | ------ | ----------------------------------- |
-| 1   | DSG    | 放电MOS驱动输出（低有效，接NMOS栅极）              |
-| 2   | CHG    | 充电MOS驱动输出（低有效，接NMOS栅极）              |
-| 3   | VSS    | 电源地（GND）                            |
-| 4   | SDA    | I2C数据线（需外接10kΩ上拉）                   |
-| 5   | SCL    | I2C时钟线（需外接10kΩ上拉）                   |
-| 6   | TS1    | 温度检测1输入（NTC热敏电阻），SHIP模式唤醒信号（拉高≥2ms） |
-| 7   | CAP1   | 电源滤波电容引脚（接0.1μF电容到VSS）              |
-| 8   | REGOUT | 3.3V LDO输出（最大5mA，可给MCU供电）           |
-| 9   | REGSRC | LDO输入源（接BAT）                        |
-| 10  | BAT    | 电池组总正极输入（6V~36V）                    |
-| 11  | NC     | 未连接（悬空）                             |
-| 12  | VC5    | 电芯5正极采样（5节电池时用）                     |
-| 13  | VC4    | 电芯4正极采                              |
-
 
 ### 低功耗&模式
 #### SHIP模式
@@ -71,20 +54,79 @@ TS1引脚拉高 ≥2ms
 - **唤醒**：ALERT触发 或 TS1拉高
 
 ### 数据读写操作
-我们需要通过IIC来进行寄存器的读写操作，那么我们需要知道两个参数：
-- 芯片I2C读/写设备地址
-- 芯片寄存器的地址
-它们分别对应I2C参数中的`DevAddress`与`MemAddress`
+
 
 > [!PDF]
 > [[III_资源仓库/Data_SHOUCE/TI-BQ769x0_DataSheet.pdf#page=3&selection=Device Comparison Table|TI-BQ769x0_DataSheet 第3页]]
+> I2C从机地址在第三页有记录
+
+| 操作类型 | 第一个数据字节的 CRC     | 后续数据字节的 CRC |
+| ---- | ---------------- | ----------- |
+| 块写   | 从地址 + 寄存器地址 + 数据 | 仅数据字节       |
+BQ769x0 实现标准的 100 kHz I2C 接口，作为从设备运行，7 位设备地址由出厂编程。所有信息都通过读写相应寄存器来传输。手册原文强调：
+
+
+> [!PDF]
+> [[III_资源仓库/Data_SHOUCE/TI-BQ769x0_DataSheet.pdf#page=18&selection=. Block reads and writes, buffered by an 8-bit CRC code per byte, ensure a fast and robust transmission of data.|TI-BQ769x0_DataSheet 第18页]]
 > 
-> ## Device Comparison Table
+> Block reads and writes, buffered by an 8-bit CRC code per byte, ensure a fast and robust transmission of data.
 > 
 
+即块读写以每字节 8 位 CRC 作为==缓冲校验==，所以我们读到的数据长这样：
+```
+[数据0][CRC0] [数据1][CRC1] [数据2][CRC2]
+```
 
 
 
+> [!NOTE] 重复起始（Repeated Start）
+> ![[TI-BQ769x0_DataSheet.pdf#page=27&rect=104,332,511,505&color=yellow|TI-BQ769x0_DataSheet, p.27]]
+> 这个图片上半部分为主机发送，下半部分为从机发送返回数据
+> ```
+> 主机：起始信号->从机地址->寄存器地址->起始信号->从机地址
+> 从机：    			                 ACK->数据->CRC->STOP
+> ```
+> ==起始信号之后的数据需要进行CRC校验==
+
+
+#### 读操作
+
+> 手册中的相关描述
+
+> [!PDF]
+> [[III_资源仓库/Data_SHOUCE/TI-BQ769x0_DataSheet.pdf#page=27&selection=• In a single-byte read transaction, the CRC is calculated after the second start and uses the slave address and data byte. • In a block read transaction, the CRC for the first data byte is calculated after the second start and uses the slave address and data byte. The CRC for subsequent data bytes is calculated over the data byte only.|TI-BQ769x0_DataSheet 第27页]]
+> 
+> • In a single-byte read transaction, the CRC is calculated after the second start and uses the slave address and data byte. 
+> • In a block read transaction, the CRC for the first data byte is calculated after the second start and uses the slave address and data byte. The CRC for subsequent data bytes is calculated over the data byte only.
+
+通过手册中的描述，读操作可以分为两类：
+- 单次读取
+- 块读取
+区别就在于进行CRC校验时，所参与的数据：块读取或单次读取的首个字节的CRC校验，要求从机地址+数据字节
+
+| 首字读 | 从地址 + 数据字节 |
+| --- | ---------- |
+
+>[!WARNING] 为什么读操作不校验数据
+>只有写操作才会对寄存器地址进行校验
+>因为对于读操作来说，寄存器地址是第一次起始时发送，不在第二次起始之后的范围
+>然而写操作不需要重复起始
+
+#### 写操作
+
+> 手册
+
+ > [!PDF]
+> [[III_资源仓库/Data_SHOUCE/TI-BQ769x0_DataSheet.pdf#page=27&selection=• In a single-byte write transaction, the CRC is calculated over the slave address, register address, and data. • In a block write transaction, the CRC for the first data byte is calculated over the slave address, register address, and data. The CRC for subsequent data bytes is calculated over the data byte only.|TI-BQ769x0_DataSheet 第27页]]
+> 
+> • In a single-byte write transaction, the CRC is calculated over the **slave address, register address, and data**. 
+> • In a block write transaction, the CRC for the first data byte is calculated over the **slave address, register address, and data**. The CRC for subsequent data bytes is calculated over the data byte only.
+
+写操作与读操作类似，块写入或单次写入的首个字节需要对从机地址、==寄存器地址==、数据进行CRC校验
+
+
+| 首字写 | 从地址+寄存器地址+数据字节 |
+| --- | -------------- |
 
 
 

@@ -1,3 +1,5 @@
+#理论/嵌入式/STM32 
+
 EXTI（External Interrupt/Event Controller）外部中断 / 事件控制器，共有 **6 个核心寄存器**，用来配置中断 / 事件的触发方式、屏蔽、以及查看 / 清除中断标志。
 
 ---

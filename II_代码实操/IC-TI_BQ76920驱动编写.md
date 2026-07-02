@@ -31,11 +31,14 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
 ```
 查询数据手册，得到读寄存器的功能码[[TODO]]
 
+
 > [!Warning] 获取到的数据流
-> 由[[IC-TI_BQ769x0#读寄存器]]可知，读取到的数据如下：
-> ```
-> [数据0][CRC0] [数据1][CRC1] [数据2][CRC2]
-> ```
+>  由[[IC-TI_BQ769x0#读操作]]可知，读取到的数据如下：
+>  ```
+>  [数据0][CRC0] [数据1][CRC1] [数据2][CRC2]
+>  ```
+
+
 
 
 >CRC校验操作
@@ -50,7 +53,7 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
         if (i == 0)  //第一组
         {
             // 1.计算出CRC数值与人家从设备返回的CRC比较
-            uint8_t crc_array[2] = {0x10 + 1, tmp_array[0]};      //把I2C设备读地址和收到的数据一起校验
+            uint8_t crc_array[2] = {0x10 + 1, tmp_array[0]};      //[!DESCRIBE]把I2C设备读地址和收到的数据一起校验
             uint8_t crc = crc8(crc_array, 2);                     //送去校验，得出结果存到crc
             // CRC校验失败
             if (crc != tmp_array[1])
@@ -98,18 +101,29 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
 计算完成后，把数据放到`buffer`里，最后释放内存
 
 
+
+### 写操作
+
+	void Int_BQ769_WriteRegister(uint16_t mem_addr, uint8_t wb)
+```c
+    uint8_t raw_arr[3] = {DEVICE_ADDR, mem_addr, wb};
+    uint8_t crc_res = crc8(raw_arr, 3);
+    uint8_t res_dta[2] = {wb, crc_res};
+    taskENTER_CRITICAL();
+    // 8.3.1.4the CRC for the first data byte is calculated over the slave address, register address, and data.
+    HAL_I2C_Mem_Write(&hi2c2, DEVICE_ADDR, mem_addr, I2C_MEMADD_SIZE_8BIT, res_dta, 2, 1000);
+    taskEXIT_CRITICAL();
+```
+
 ### 获取Gain和Offset
 	static void App_Battery_GetGainAndOffset(void)
 
 > 读取Gain
 ```c
-static void App_Battery_GetGainAndOffset(void)
-{
     uint8_t adc_gain1_val = 0;
     uint8_t adc_gain2_val = 0;
     //--------------------------------------------------
     // 读取ADCGAIN1寄存器
-    //--------------------------------------------------
     if (!Int_BQ769_ReadRegister(BQ_ADCGAIN1, &adc_gain1_val, 1))
     {
         COM_DEBUG_LN("Read ADCGAIN1 Failed");
@@ -117,7 +131,6 @@ static void App_Battery_GetGainAndOffset(void)
     }
     //--------------------------------------------------
     // 读取ADCGAIN2寄存器
-    //--------------------------------------------------
     if (!Int_BQ769_ReadRegister(BQ_ADCGAIN2, &adc_gain2_val, 1))
     {
         COM_DEBUG_LN("Read ADCGAIN2 Failed");
@@ -167,7 +180,6 @@ static void App_Battery_GetGainAndOffset(void)
         printf("getting volita crc faild");
         return;
     }
-
     for (size_t i = 0; i < BATTERY_NUM; i++)
     {
         battery_array[i] = (gain * (temp_array[2 * i + 1] | temp_array[2 * i] << 8) + offset) / 1000.0;

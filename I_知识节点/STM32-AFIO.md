@@ -1,3 +1,7 @@
+#理论/嵌入式/STM32 
+
+
+
 AFIO(Alternate Function Input/Output 复用输入输出)
 AFIO是stm32上的众多片上外设之一，专门用来执行“复用功能的重映射”
 

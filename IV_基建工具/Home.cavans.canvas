@@ -2,7 +2,7 @@
 	"nodes":[
 		{"id":"f91e3756873c556b","type":"file","file":"索引/STM32-索引.md","x":-820,"y":-820,"width":500,"height":500},
 		{"id":"7ae3c4db1a4d65d0","type":"file","file":"索引/嵌入式操作系统-索引.md","x":-240,"y":-820,"width":520,"height":500},
-		{"id":"ee71fe4a01fa1570","type":"file","file":"索引/嵌入式-索引.md","x":-820,"y":-1300,"width":400,"height":400}
+		{"id":"ee71fe4a01fa1570","type":"file","file":"索引/嵌入式-索引.md","x":-820,"y":-1340,"width":500,"height":440}
 	],
 	"edges":[],
 	"metadata":{
