@@ -28,7 +28,6 @@
 - 高速信号（SPI、JTAG、UART 等）可旁路 GPIO 交换矩阵直通
 
 
-
 ---
 
 ## 三、焊盘（PAD）内部结构
@@ -68,8 +67,6 @@ typedef struct {
 > ```c
 > .pin_bit_mask = xULL << GPIO_NUM_x, //[!x]这里的x替换为引脚号
 > ```
-
-
 
 
 
