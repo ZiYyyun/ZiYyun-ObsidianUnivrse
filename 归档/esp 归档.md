@@ -1,6 +1,23 @@
 
 
+### i2c
+esp32的i2c有两个控制器
 
+```c
+/**
+
+ * @brief I2C port number.
+
+ */
+
+typedef int i2c_port_num_t;
+```
+
+这个port就是选择方式：
+- `I2C_NUM_0`
+- `I2c_NUM_1`
+
+各个外设的CLK宏定义在`clk_tree_defs.h
 
 i2s
 ```c
@@ -63,14 +80,28 @@ typedef struct {
 ```
 
 ```
-ESP32-S3 (I2S Master)                    ES8311 (I2S Slave)
-┌──────────────┐                        ┌──────────────┐
-│              │──── MCLK ─────────────→│              │
-│              │──── BCLK ─────────────→│              │
-│      I2S     │──── WS   ─────────────→│    ES8311    │
-│              │──── DOUT  ────────────→│  (DAC 播放)   │
-│              │←──── DIN  ─────────────│  (ADC 录音)   │
-└──────────────┘                        └──────────────┘
+┌─────────────────┐           ┌──────────────────────────┐
+│       ESP       │           │          ES8311          │
+│                 │           │                          │
+│       I2S_MCK_IO├──────────►│PIN2-MCLK                 │
+│                 │           │                          │           ┌─────────┐
+│       I2S_BCK_IO├──────────►│PIN6-BCLK       PIN12-OUTP├───────────┤         │
+│                 │           │                          │           │ EARPHONE│
+│        I2S_WS_IO├──────────►│PIN8-LRCK       PIN13-OUTN├───────────┤         │
+│                 │           │                          │           └─────────┘
+│        I2S_DO_IO├──────────►│PIN9-SDIN                 │
+│                 │           │                          │
+│        I2S_DI_IO│◄──────────┤PIN7-SDOUT                │
+│                 │           │                          │           ┌─────────┐
+│                 │           │               PIN18-MIC1P├───────────┤         │
+│       I2C_SCL_IO├──────────►│PIN1 -CCLK                │           │  MIC    │
+│                 │           │               PIN17-MIC1N├───────────┤         │
+│       I2C_SDA_IO│◄─────────►│PIN19-CDATA               │           └─────────┘
+│                 │           │                          │
+│          VCC 3.3├───────────┤VCC                       │
+│                 │           │                          │
+│              GND├───────────┤GND                       │
+└─────────────────┘           └──────────────────────────┘
 ```
 
 ## 各字段说明
@@ -82,3 +113,19 @@ ESP32-S3 (I2S Master)                    ES8311 (I2S Slave)
 |`ws`|**W**ord **S**elect|主设备 → 从设备|帧同步信号，切换左右声道，频率 = 采样率（如 48kHz），高电平=右声道，低电平=左声道|
 |`dout`|**D**ata **Out**|主设备（ESP32）→ 从设备（ES8311）|播放路径：ESP32 **发送**音频数据给 ES8311（DAC）|
 |`din`|**D**ata **In**|从设备（ES8311）→ 主设备（ESP32）|录音路径：ES8311 **发送**音频数据给 ESP32（ADC）|
+
+
+```c
+typedef struct {
+
+    uint8_t port;      /*!< I2S port, this port need pre-installed by other modules */
+
+    void   *rx_handle; /*!< I2S rx handle, need provide on IDF 5.x */
+
+    void   *tx_handle; /*!< I2S tx handle, need provide on IDF 5.x */
+
+    int     clk_src;   /*!< I2S clock source, need converted from `i2s_clock_src_t`. If set to 0 will use default clock source */
+
+} audio_codec_i2s_cfg_t;
+```
+

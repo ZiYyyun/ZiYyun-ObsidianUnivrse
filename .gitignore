@@ -1,22 +1,20 @@
-# Ignore Obsidian workspace and plugin data
-.obsidian/
+# Obsidian Git 安全配置
+# 仅忽略缓存与设备专属布局，保留插件、配置、PDF、附件等所有重要文件
 
-# Ignore trash and attachments
+# Obsidian 缓存和设备专属工作区（多设备同步会冲突，无需备份）
+.obsidian/cache
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Obsidian 本地回收站（可选，需要备份就注释掉）
 .trash/
-Attachments/
 
-# Ignore large book and binary files
-*/Books/
-*.pdf
-*.epub
-*.mobi
-*.7z
-*.zip
+# 系统垃圾文件
+.DS_Store
+Thumbs.db
 
-# Ignore pasted images from Obsidian
-Pasted image*.png
-
-# Node / Python / Editor
+# 开发环境（如果不用可以保留，不影响笔记）
 venv/
 __pycache__/
 *.pyc
+node_modules/
