@@ -9,6 +9,7 @@ tags:
   - clippings
   - "#esp32"
   - "#I2S"
+  - "#小智"
 ---
 ## I2S
 

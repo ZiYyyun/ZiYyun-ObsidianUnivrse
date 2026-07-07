@@ -9,6 +9,7 @@ description:
 tags:
   - clippings
   - esp32
+  - "#小智"
 ---
 ## AFE 声学前端算法框架
 

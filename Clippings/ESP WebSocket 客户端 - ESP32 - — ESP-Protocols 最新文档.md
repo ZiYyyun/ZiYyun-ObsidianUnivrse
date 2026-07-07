@@ -8,6 +8,7 @@ description:
 tags:
   - clippings
   - esp32
+  - "#小智"
 ---
 ## ESP WebSocket客户端
 

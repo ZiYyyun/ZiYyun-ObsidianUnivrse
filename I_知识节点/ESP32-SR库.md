@@ -15,7 +15,7 @@ ESP-SR 支持以下模块：
 - [唤醒词检测 WakeNet](https://docs.espressif.com/projects/esp-sr/zh_CN/latest/esp32s3/wake_word_engine/README.html)
 - [命令词识别 MultiNet](https://docs.espressif.com/projects/esp-sr/zh_CN/latest/esp32s3/speech_command_recognition/README.html)
 - [语音合成（目前只支持中文）](https://docs.espressif.com/projects/esp-sr/zh_CN/latest/esp32s3/speech_synthesis/readme.html)
-
+> 想要实现SR功能，需要先对`ES8311`进行驱动编写[[II_代码实操/IC-ES8311|IC-ES8311]]
 ---
 
 ### 语音处理完整链路
