@@ -1,5 +1,6 @@
 
 
+
 ### i2c
 esp32的i2c有两个控制器
 
@@ -12,6 +13,7 @@ esp32的i2c有两个控制器
 
 typedef int i2c_port_num_t;
 ```
+
 
 这个port就是选择方式：
 - `I2C_NUM_0`
