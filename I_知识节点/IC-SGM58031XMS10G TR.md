@@ -50,6 +50,35 @@
 ![[IC-SGMICRO-SGM58031XMS10G-TR.pdf#page=19&rect=41,382,556,432&color=yellow|IC-SGMICRO-SGM58031XMS10G-TR, p.19]]
 
 16位的ADC转换结果在这个寄存器存放
+
+> ADC数据转换
+
+
+手册中提到一句话：
+> ([[IC-SGMICRO-SGM58031XMS10G-TR.pdf#page=14&selection=129,0,130,17&color=yellow|IC-SGMICRO-SGM58031XMS10G-TR, p.14]])
+> The SGM58031 conversion result data is in binary two's complement format
+
+意思是：
+> ADC输出的是一个16位有符号整数（二进制补码）
+
+这其实就是**输入电压占满量程（FS）** 的比例
+这个量程我们在下面配置寄存器的`D[11:9](PGA[2:0])`位配置好的
+![[IC-SGMICRO-SGM58031XMS10G-TR.pdf#page=14&rect=40,336,287,445&color=yellow|IC-SGMICRO-SGM58031XMS10G-TR, p.14]]
+
+那么由于`int16`的取值范围是`-32768到32767`，又由：
+```
+比例 × 满量程
+```
+所以：
+```
+raw / 32768 * FS
+```
+
+
+
+
+
+
 #### 配置寄存器
 
 ![[IC-SGMICRO-SGM58031XMS10G-TR.pdf#page=20&rect=41,213,556,674&color=yellow|IC-SGMICRO-SGM58031XMS10G-TR, p.20]]
