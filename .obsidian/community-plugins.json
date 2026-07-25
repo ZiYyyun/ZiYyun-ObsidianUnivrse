@@ -2,5 +2,7 @@
   "obsidian-git",
   "codeblock-customizer",
   "dataview",
-  "pdf-plus"
+  "pdf-plus",
+  "nutstore-sync",
+  "local-backup"
 ]

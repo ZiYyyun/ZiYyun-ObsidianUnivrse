@@ -2,10 +2,6 @@
 #实操/开发/嵌入式/STM32/项目/自行车码表 
 
 
-
-
-
-
 ### 定位实现
 	void latlon_to_world_pixel(double lat,double lon,int zoom,uint32_t *x,uint32_t *y)
 ```c
@@ -24,14 +20,15 @@
 
 ### 缩放实现
 
-
 > World Pixel 世界坐标
      我们在GUI界面显示地图定位时，需要了解到这个概念。在实际编写中，我们给图片以像素点为单位，建立起坐标系。由此我们的位置就是(x,y)
 
 
 > [!NOTE] 计算公式
 > 
-
+```
+	世界宽 = 256 × 2^Zoom
+```
 
 
 
@@ -100,3 +97,15 @@ sprintf(
 S:/14/13372/7134/tile.bmp
 ```
 
+### 位移刷新实现
+
+
+	static void Refresh_Map(uint32_t center_tile_x, uint32_t center_tile_y, uint8_t zoom)
+```c
+  for (uint8_t i = 0; i < 9; i++) {
+    uint32_t current_tile_x, current_tile_y;
+    current_tile_x = center_tile_x + (i % 3) - 1;
+    current_tile_y = center_tile_y + (i / 3) - 1;
+    load_tile(image[i], current_tile_x, current_tile_y, zoom);
+  }
+```
