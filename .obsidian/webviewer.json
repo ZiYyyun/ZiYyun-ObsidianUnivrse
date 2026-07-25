@@ -1,5 +1,7 @@
 {
   "openExternalURLs": true,
   "enableAdblocking": true,
-  "searchEngine": "bing"
+  "searchEngine": "bing",
+  "homepage": "www.bing.com",
+  "markdownPath": "III_资源仓库/Clippings"
 }
