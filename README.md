@@ -55,22 +55,6 @@ obsidian-/
 - `LVGL.base` — 图形库
 - `牛马定位器.base` — 项目笔记
 
-## 🔧 使用方式
-
-### 📥 拉取最新
-
-```bash
-git pull
-```
-
-### 📤 提交更新
-
-```bash
-git add .
-git commit -m "feat: 简述本次更新"
-git push
-```
-
 ### ⚠️ 注意事项
 
 - 🔒 请勿直接推送到 `main` 分支,建议走 PR
