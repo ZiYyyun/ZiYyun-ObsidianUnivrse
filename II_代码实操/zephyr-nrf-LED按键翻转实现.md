@@ -52,7 +52,6 @@ static const struct gpio_dt_spec button =
 
 ```c
 static struct gpio_callback button_cb_data;
-
 ```
 
 > 按键中断处理
