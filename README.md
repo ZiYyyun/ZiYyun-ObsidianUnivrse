@@ -1,75 +1,47 @@
-# 📚 ZiYyun-Obsidian 知识宇宙
+# 📚 Obsidian 知识宇宙
 
 > 💡 嵌入式开发者的个人知识库 · 基于 Obsidian + Git 持续维护
-
-
 
 ## 🎯 简介
 
 这是一个围绕 **嵌入式开发** 为主线的 Obsidian 知识库,涵盖 STM32、ESP32、FreeRTOS、LVGL、通信协议、IC 驱动等核心方向,辅以 Rust / C++ / Qt 拓展,搭配每日笔记和项目实战沉淀。
-
-
 
 ## 📁 目录结构
 
 ```
 obsidian-/
 ├── 📝 Daily/              # 每日笔记 + 练习
-│   ├── YYYY-MM-DD.md      # 日记模板
-│   └── Practics/          # 编程练习
-│
-├── 🧠 I_知识节点/         # 理论知识
-│   ├── STM32-*            # STM32 外设/寄存器
-│   ├── FreeRTOS-*         # RTOS 任务/队列/定时器
-│   ├── LVGL-*             # 图形库
-│   ├── Prot-*             # 通信协议(IIC/SPI/CAN/MQTT/Modbus)
-│   ├── IC-*               # 芯片/模块(DS18B20/ES8311/BQ769x0...)
-│   └── Rust-* / C-*       # 语言基础
-│
-├── 💻 II_代码实操/         # 实践代码
-│   ├── STM32-*            # 寄存器/HAL 双版本
-│   ├── CC2530-*           # Zigbee 开发
-│   ├── IC-* 驱动          # 各类 IC 驱动编写
-│   └── Prot-*             # 协议实现
-│
-├── 📦 III_资源仓库/       # 外部资源
-│   ├── Clippings/         # 网页剪藏
-│   ├── DataSheet/         # PDF 数据手册
-│   └── 参考手册/          # 参考图片
-│
-├── 🛠️ IV_基建工具/        # 模板与工具
-│   ├── DailyNotes-template.md
-│   ├── HomePage-template.md
-│   └── Home.cavans.canvas
-│
-├── 🚀 五、项目仓库/       # 项目实战
-│   ├── 步进电机/
-│   ├── 牛马定位器/
-│   ├── BMS-索引.md
-│   ├── Ai小智.md
-│   └── 漏水检测仪.md
-│
-├── 🗂️ 索引/              # 入口导航
-│   ├── 嵌入式-索引.md
-│   └── Q&A.md
-│
+├── 🧠 I_知识节点/         # 理论知识(STM32/FreeRTOS/LVGL/Prot/IC...)
+├── 💻 II_代码实操/         # 实践代码(寄存器/HAL 双版本)
+├── 📦 III_资源仓库/       # Datasheet、剪藏、参考手册
+├── 🛠️ IV_基建工具/        # 模板、画布、首页
+├── 🚀 五、项目仓库/       # 步进电机、牛马定位器、BMS、Ai小智...
+├── 🗂️ 索引/              # 主索引导航
 ├── 📦 归档/               # 历史归档
 ├── 🖼️ 附件/              # 图片附件
 └── 📊 *.base             # 原生数据库视图
 ```
 
+<details>
+<summary>📁 笔记示例</summary>
 
+| 主题 | 笔记 |
+|------|------|
+| STM32 寄存器 | `I_知识节点/STM32-GPIO寄存器.md` |
+| FreeRTOS | `I_知识节点/FreeRTOS-任务通知.md` |
+| 通信协议 | `I_知识节点/Prot-Modbus.md` |
+| IC 驱动 | `II_代码实操/IC-ES8311.md` |
+| 项目实战 | `五、项目仓库/步进电机/App_Motor_TI.md` |
+| LVGL 图形库 | `I_知识节点/LVGL-布局.md` |
+
+</details>
 
 ## 🗂️ 索引入口
 
-| 入口 | 说明 |
-|------|------|
+| 入口                        | 说明           |
+| ------------------------- | ------------ |
 | 📌 [嵌入式-索引](索引/嵌入式-索引.md) | 主索引入口,嵌入各子索引 |
-| 🧩 [STM32 索引](索引/STM32-索引.md) | STM32 专题导航 |
-| ⚙️ [嵌入式操作系统索引](索引/嵌入式操作系统-索引.md) | FreeRTOS 等 RTOS |
-| ❓ [Q&A](索引/Q&A.md) | 问答速查 |
-
-
+| ❓ [Q&A](索引/Q&A.md)        | 问答速查         |
 
 ## 📊 数据库视图(Bases)
 
@@ -82,8 +54,6 @@ obsidian-/
 - `IC.base` — 芯片驱动库
 - `LVGL.base` — 图形库
 - `牛马定位器.base` — 项目笔记
-
-
 
 ## 🔧 使用方式
 
@@ -105,21 +75,19 @@ git push
 
 - 🔒 请勿直接推送到 `main` 分支,建议走 PR
 - 📝 日记自动生成,模板见 `IV_基建工具/DailyNotes-template.md`
-- 🧩 Dataview / Templater / Tasks 插件依赖,详见 [Obsidian库恢复清单.md](Obsidian库恢复清单.md)
 
+## 🧰 插件清单
 
+### 🧩 第三方插件
 
-## 🧰 推荐插件
-
-| 插件 | 用途 |
+| 功能 | 插件 |
 |------|------|
-| 🔄 Obsidian Git | 自动备份同步 |
-| 📊 Dataview | 数据查询视图 |
-| 📋 Templater | 高级模板脚本 |
-| ✅ Tasks | 任务管理 |
-| 🎨 Codeblock Customizer | 代码块美化 |
-
-
+| 🔄 Git 版本同步 | Obsidian Git |
+| ☁️ 坚果云备份 | Nutstore Sync |
+| 💾 本地备份 | Local Backup |
+| 📊 数据查询视图 | Dataview |
+| 🎨 代码块美化 | Codeblock Customizer |
+| 📕 PDF 增强 | PDF Plus |
 
 ## 📜 License
 
