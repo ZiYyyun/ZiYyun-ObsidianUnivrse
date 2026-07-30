@@ -1,6 +1,7 @@
 #实操/开发/嵌入式/LINUX/NixOS
 #Linux
-
+#nixos
+#blog 
 本文为ARMv7架构，故使用`armv7l-unknown-linux-gnueabihf-*`工具(PS:其他架构可在[https://github.com/NixOS/nixpkgs/blob/master/lib/systems/examples.nix]查到)
 
 创建

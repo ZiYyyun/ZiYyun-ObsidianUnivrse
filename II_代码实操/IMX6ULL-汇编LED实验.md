@@ -1,5 +1,5 @@
 #实操/开发/嵌入式/LINUX 
-
+#blog 
 ### STM32 GPIO回顾
 > 在学习 I.MX6U的 GPIO 之前，我们先来回顾一下 STM32 的 GPIO 初始化
 ```c

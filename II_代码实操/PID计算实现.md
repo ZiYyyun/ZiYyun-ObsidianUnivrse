@@ -1,5 +1,5 @@
 #实操/开发 
-
+#blog 
 PID的主要输入参数就是`current_speed`和`target_speed`，因为我们要将电机加速到目标速度，然而电机的加速需要`pulse(频率)`来控制，PID公式就是用来输出这个的
 
 ---
