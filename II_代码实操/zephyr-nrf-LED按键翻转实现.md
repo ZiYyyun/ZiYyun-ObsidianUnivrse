@@ -17,7 +17,6 @@
 
 可以理解为从设备树中获取对应的参数(但是这个dt_cat底层我不知道咋写的)
 
-
 > 定义LED引脚
 ```c
 static const struct gpio_dt_spec led =
