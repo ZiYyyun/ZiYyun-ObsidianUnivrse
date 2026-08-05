@@ -18,3 +18,5 @@ venv/
 __pycache__/
 *.pyc
 node_modules/
+
+/III_资源仓库/参考手册/【正点原子】I.MX6U嵌入式Linux驱动开发指南V1.81.pdf
