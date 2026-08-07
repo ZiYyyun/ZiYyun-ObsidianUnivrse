@@ -24,7 +24,6 @@
 	TIM5->CR1 &= ~TIM_CR1_OPM;
 ```
 
-
 #### 配置输出模式
 参考：[[STM32-TIM-定时器#捕获/比较模式寄存器（TIMx_CCMR）#输出模式]]
 ```c
@@ -74,7 +73,6 @@ int main(void)
     Int_Led_Init();
     Dri_Tim5_Init();
     Dri_Tim5_Start();
-
     uint8_t duty = 10, dir = 0;
     while (1)
     {

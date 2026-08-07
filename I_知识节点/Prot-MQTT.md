@@ -10,7 +10,7 @@ MQTT（Message Queuing Telemetry Transport）本质上是一个基于发布-订�
 MQTT就三个角色：
 - `Client`：终端
 - `Broker`：服务器
-- `Topic`：通讯
+- `Subscriber`：订阅者
 
 > [!NOTE] Topic
 > MQTT没有IP地址概念，靠Topic通信，比如：
@@ -18,8 +18,6 @@ MQTT就三个角色：
 > - motor/temp
 > - led/state
 > 
-
-
 
 ### 主要函数
 
