@@ -1,4 +1,4 @@
-#实操/开发/嵌入式  #MQTT  #Prot
+#实操/开发/嵌入式  #MQTT  #Prot #blog 
 
 本笔记记录 MQTT 协议的实操落地,基于 W5500 + STM32 作为客户端连接 Broker。理论部分见 [[I_知识节点/Prot-MQTT]]。
 

@@ -1,4 +1,4 @@
-#实操/开发/嵌入式  #modbus  #Prot
+#实操/开发/嵌入式  #modbus  #Prot #blog 
 
 本笔记记录 Modbus 协议的实操落地,基于 FreeModbus 协议栈在 STM32 上移植与使用。理论部分见 [[I_知识节点/Prot-Modbus]]。
 
