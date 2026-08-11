@@ -1,106 +1,218 @@
-#实操/开发/嵌入式  #MQTT  #Prot #blog 
+#实操/开发/嵌入式/Linux  #MQTT  #Prot
 
-本笔记记录 MQTT 协议的实操落地,基于 W5500 + STM32 作为客户端连接 Broker。理论部分见 [[I_知识节点/Prot-MQTT]]。
+本笔记记录 MQTT 协议在全志 V3s (Linux) 下的实操落地,基于 Mosquitto 客户端库 / Paho MQTT-C。理论部分见 [[I_知识节点/Prot-MQTT]]。
 
 ---
 
 ## 📋 核心角色与概念
 
-| 角色 | 说明 |
-|------|------|
-| Client | 终端设备(单片机) |
-| Broker | 服务器(Mosquitto/EMQX 等) |
-| Topic | 通信主题,层级用 `/` 分隔 |
+| 角色     | 说明                              |
+| ------ | ------------------------------- |
+| Client | 终端设备(V3s 板子)                    |
+| Broker | 服务器(Mosquitto/EMQX 等,可跑在 PC/云端) |
+| Topic  | 通信主题,层级用 `/` 分隔                 |
+
+
 
 > 常用 Topic 示例:`motor/speed`、`motor/temp`、`led/state`
+
+
+## 🧩 库选型对比
+
+| 库 | 语言 | 特点 |
+|----|------|------|
+| Mosquitto (libmosquitto) | C | Eclipse 官方,API 简洁,Linux 友好 ✅ 推荐 |
+| Paho MQTT-C | C | Eclipse 官方,功能全面,跨平台 |
+| paho-mqtt | Python | 简单易用,适合快速验证 |
+
+本笔记以 **libmosquitto** 为主。
+
+
+
+## 🛠️ 交叉编译
+
+V3s 工具链:`arm-linux-gnueabihf-gcc`
+
+### 编译 Mosquitto 库
+
+```bash
+# 1. 下载源码
+git clone https://github.com/eclipse/mosquitto.git
+cd mosquitto
+
+# 2. 修改 config.mk,指定交叉编译
+#    WITH_SRV := no       # 不依赖 c-ares
+#    WITH_DOCS := no      # 不编译文档
+
+# 3. 交叉编译
+make CC=arm-linux-gnueabihf-gcc \
+     CXX=arm-linux-gnueabihf-g++ \
+     AR=arm-linux-gnueabihf-ar \
+     -j4
+
+# 4. 部署到板子(关键文件)
+# lib/libmosquitto.so*   →  /usr/lib/
+# lib/cpp/libmosquittopp.so* (若用 C++)
+# 头文件 mosquitto.h     →  /usr/include/
+# 客户端程序 mosquitto_pub/sub (可选)
+```
+
+> ⚠️ 运行时记得 `ldconfig` 刷新动态库缓存
+
+### 测试 Broker(PC 端)
+
+```bash
+# PC 上快速起一个 Broker
+mosquitto -p 1883
+
+# 另开终端订阅
+mosquitto_sub -h 127.0.0.1 -t "test/topic" -v
+
+# 发布测试
+mosquitto_pub -h 127.0.0.1 -t "test/topic" -m "hello"
+```
 
 
 
 ## 🚀 操作流程
 
 ```
-W5500 初始化(phy link)
+网络初始化(ETH/WiFi 就绪)
       ↓
-TCP 连接 Broker
+mosquitto_new (创建客户端实例)
       ↓
-MQTTClientInit
+mosquitto_connect (连接 Broker)
       ↓
-MQTTConnect(建立会话)
+mosquitto_connect_callback_set (注册连接回调)
       ↓
-MQTTSubscribe(订阅主题)
+mosquitto_message_callback_set (注册消息回调)
       ↓
-MQTTYield(循环收包)
+mosquitto_subscribe (订阅主题)
       ↓
-收到消息 → 回调处理
+mosquitto_loop_start (后台线程收包)
+      ↓
+mosquitto_publish (按需发布)
+      ↓
+mosquitto_loop_stop + mosquitto_destroy (清理)
 ```
 
 
 
-## 🧩 启动模板
+## 💻 客户端模板
 
 ```c
-#include "MQTTClient.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <mosquitto.h>
 
-MQTTClient  client;
-Network     network;
-unsigned char sendbuf[128], readbuf[128];
+#define BROKER_HOST  "192.168.1.100"
+#define BROKER_PORT  1883
+#define CLIENT_ID    "v3s_client_01"
 
-void messageArrived(MessageData *data)
+/* 连接回调 */
+static void on_connect(struct mosquitto *m, void *obj, int rc)
 {
-    // 处理收到的订阅消息
-    // data->message->payload  载荷
-    // data->topicName         主题
+    if (rc == 0) {
+        printf("[MQTT] Connected OK\n");
+        mosquitto_subscribe(m, NULL, "motor/cmd", 0);
+    } else {
+        printf("[MQTT] Connect failed: %s\n", mosquitto_connack_string(rc));
+    }
+}
+
+/* 消息回调 */
+static void on_message(struct mosquitto *m, void *obj,
+                       const struct mosquitto_message *msg)
+{
+    printf("[MQTT] Topic: %s  Payload: %.*s\n",
+           msg->topic, msg->payloadlen, (char *)msg->payload);
 }
 
 int main(void)
 {
-    HAL_Init();
-    SystemClock_Config();
-    MX_SPI1_Init();         // W5500 挂在 SPI 上
-    MX_USART1_UART_Init();
+    struct mosquitto *m;
+    int               rc;
 
-    W5500_Init();           // PHY 初始化
-    W5500_SetDHCP();        // 获取 IP
+    /* 1. 初始化库 */
+    mosquitto_lib_init();
 
-    // 1. 网络层初始化 + TCP 连接
-    NetworkInit(&network);
-    NetworkConnect(&network, "broker.example.com", 1883);
-
-    // 2. MQTT 客户端初始化
-    MQTTClientInit(&client, &network, 1000, sendbuf, sizeof(sendbuf), readbuf, sizeof(readbuf));
-
-    // 3. 建立连接
-    MQTTPacket_connectData opts = MQTTPacket_connectData_initializer;
-    opts.clientID.cstring  = "stm32_client";
-    opts.keepAliveInterval = 60;
-    opts.cleansession      = 1;
-    MQTTConnect(&client, &opts);
-
-    // 4. 订阅
-    MQTTSubscribe(&client, "motor/cmd", QOS0, messageArrived);
-
-    // 5. 主循环收包
-    while (1)
-    {
-        MQTTYield(&client, 1000);
+    /* 2. 创建客户端实例 */
+    m = mosquitto_new(CLIENT_ID, true, NULL);
+    if (!m) {
+        fprintf(stderr, "Failed to create client\n");
+        return -1;
     }
+
+    /* 3. 注册回调 */
+    mosquitto_connect_callback_set(m, on_connect);
+    mosquitto_message_callback_set(m, on_message);
+
+    /* 4. 设置用户名密码(如 Broker 需要认证) */
+    // mosquitto_username_pw_set(m, "user", "pass");
+
+    /* 5. 连接 Broker */
+    rc = mosquitto_connect(m, BROKER_HOST, BROKER_PORT, 60);
+    if (rc != MOSQ_ERR_SUCCESS) {
+        fprintf(stderr, "Connect failed: %s\n", mosquitto_strerror(rc));
+        mosquitto_destroy(m);
+        mosquitto_lib_cleanup();
+        return -1;
+    }
+
+    /* 6. 启动后台收包线程(非阻塞) */
+    rc = mosquitto_loop_start(m);
+    if (rc != MOSQ_ERR_SUCCESS) {
+        fprintf(stderr, "Loop start failed: %s\n", mosquitto_strerror(rc));
+    }
+
+    /* 7. 主循环:按需发布 */
+    while (1) {
+        char payload[] = "hello from v3s";
+        mosquitto_publish(m, NULL, "motor/status",
+                          strlen(payload), payload, 0, false);
+        sleep(5);
+    }
+
+    /* 8. 清理 */
+    mosquitto_loop_stop(m, true);
+    mosquitto_disconnect(m);
+    mosquitto_destroy(m);
+    mosquitto_lib_cleanup();
+    return 0;
 }
 ```
 
+### Makefile
 
+```makefile
+CROSS   = arm-linux-gnueabihf-
+CC      = $(CROSS)gcc
+CFLAGS  = -I/opt/mosquitto-v3s/include
+LDFLAGS = -L/opt/mosquitto-v3s/lib -lmosquitto -lpthread
 
-## 📨 发布消息
+TARGET  = mqtt_demo
+SRC     = main.c
 
-```c
-MQTTMessage msg;
-msg.payload     = (void *)"hello";
-msg.payloadlen  = 5;
-msg.qos         = QOS0;
-msg.retained    = 0;
-msg.dup         = 0;
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-MQTTPublish(&client, "motor/status", &msg);
+clean:
+	rm -f $(TARGET)
 ```
+
+
+
+## 📨 发布与订阅 API
+
+| 函数 | 功能 |
+|------|------|
+| `mosquitto_publish` | 发布消息到指定主题 |
+| `mosquitto_subscribe` | 订阅主题 |
+| `mosquitto_unsubscribe` | 取消订阅 |
+| `mosquitto_message_callback_set` | 注册消息到达回调 |
+| `mosquitto_connect_callback_set` | 注册连接状态回调 |
+| `mosquitto_disconnect_callback_set` | 注册断开回调 |
 
 
 
@@ -112,38 +224,44 @@ MQTTPublish(&client, "motor/status", &msg);
 | 1 | 至少一次,可能重复 | 普通控制指令 |
 | 2 | 恰好一次,开销大 | 计费/关键指令 |
 
+> 📌 QoS 2 需要 4 次握手,V3s 资源有限时建议用 QoS 1 兼顾可靠与开销。
 
 
-## 🔧 关键函数速查
+
+## 🔧 核心 API 速查
 
 | 函数 | 功能 |
 |------|------|
-| `NetworkInit` | 初始化网络层(绑定 W5500 socket) |
-| `NetworkConnect` | 建立 TCP 连接到 Broker |
-| `MQTTClientInit` | 初始化客户端,绑定收发缓冲 |
-| `MQTTConnect` | 发起 MQTT 连接握手 |
-| `MQTTSubscribe` | 订阅主题,注册回调 |
-| `MQTTUnsubscribe` | 取消订阅 |
-| `MQTTPublish` | 发布消息到指定主题 |
-| `MQTTYield` | 循环收包,需周期调用 |
-| `MQTTDisconnect` | 断开连接 |
+| `mosquitto_lib_init` | 初始化库(进程级,只调用一次) |
+| `mosquitto_new` | 创建客户端实例 |
+| `mosquitto_connect` | 连接 Broker(指定 IP/端口/心跳) |
+| `mosquitto_connect_async` | 异步连接(配合 loop_start) |
+| `mosquitto_disconnect` | 断开连接 |
+| `mosquitto_loop_start` | 启动后台线程收包 |
+| `mosquitto_loop_stop` | 停止后台线程 |
+| `mosquitto_loop_forever` | 阻塞式收包(单线程模式) |
+| `mosquitto_publish` | 发布消息 |
+| `mosquitto_subscribe` | 订阅主题 |
+| `mosquitto_destroy` | 释放客户端实例 |
+| `mosquitto_lib_cleanup` | 清理库资源 |
+| `mosquitto_strerror` | 错误码转字符串 |
 
 
 
 ## 🐛 调试技巧
 
-- [ ] W5500 物理链路是否 LINK UP
-- [ ] Broker IP/端口是否可达(用 PC 的 `mosquitto_sub` 验证)
-- [ ] `MQTTYield` 调用频率是否 < `keepAliveInterval`
-- [ ] 发送缓冲区大小是否足够容纳最大包
-- [ ] Topic 层级分隔符 `/` 是否正确
+- [ ] 网络层:`ping <broker_ip>` 确认可达
+- [ ] 端口:`telnet <broker_ip> 1883` 测试 TCP 连通
+- [ ] 用 PC 端 `mosquitto_sub` 监听板子发布的主题
+- [ ] 检查 `keepalive` 是否合理(默认 60s)
+- [ ] 断线重连:可注册 disconnect 回调 + `mosquitto_reconnect`
 - [ ] 中文载荷注意 UTF-8 编码
+- [ ] 多线程发布需要加锁(同一 `mosquitto_t*` 非线程安全)
 
 
 
 ## 📎 相关笔记
 
 - 理论: [[I_知识节点/Prot-MQTT]]
-- 实例: [[II_代码实操/Prot-MQTT实例]]
-- W5500 驱动: [[II_代码实操/IC-W5500驱动移植]]
-- QS100 NB-IoT: [[II_代码实操/IC-QS100-NBIoT]]
+- 单片机+W5500 实例: [[II_代码实操/Prot-MQTT实例]]
+- V3s 网络配置: [[II_代码实操/V3s-网络配置]]

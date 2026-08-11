@@ -1,6 +1,6 @@
-#实操/开发/嵌入式  #modbus  #Prot #blog 
+#实操/开发/嵌入式/Linux  #modbus  #Prot
 
-本笔记记录 Modbus 协议的实操落地,基于 FreeModbus 协议栈在 STM32 上移植与使用。理论部分见 [[I_知识节点/Prot-Modbus]]。
+本笔记记录 Modbus 协议在全志 V3s (Linux) 下的实操落地,基于 libmodbus 库。理论部分见 [[I_知识节点/Prot-Modbus]]。
 
 ---
 
@@ -19,121 +19,218 @@
 
 
 
-## 🧩 移植流程
+## 🧩 libmodbus 简介
 
+> 📦 开源仓库:[stephane/libmodbus](https://github.com/stephane/libmodbus)
+> 支持 Modbus RTU(串口) 与 Modbus TCP(网络) 两种模式,Linux/Unix 友好。
+
+### 两种模式对比
+
+| 模式 | 后端 | 适用场景 |
+|------|------|----------|
+| RTU | `/dev/ttyS*` 串口 | 与本地从机直连 |
+| TCP | socket 网络 | 与远程设备/Broker 通信 |
+
+
+
+## 🛠️ 交叉编译
+
+V3s 工具链:`arm-linux-gnueabihf-gcc`
+
+```bash
+# 1. 下载源码
+git clone https://github.com/stephane/libmodbus.git
+cd libmodbus
+
+# 2. 生成 configure
+./autogen.sh
+
+# 3. 交叉编译配置
+./configure \
+    --host=arm-linux-gnueabihf \
+    --prefix=/opt/libmodbus-v3s \
+    CC=arm-linux-gnueabihf-gcc
+
+# 4. 编译安装
+make -j4
+make install
+
+# 5. 部署到板子
+# 库文件:    /opt/libmodbus-v3s/lib/libmodbus.so*
+# 头文件:    /opt/libmodbus-v3s/include/modbus/
+# 拷贝 .so 到板子 /usr/lib/
 ```
-FreeModbus 源码获取
-      ↓
-拷贝 Modbus/ 与 port/ 到工程
-      ↓
-配置 include path
-      ↓
-移植 portserial.c (串口驱动)
-      ↓
-移植 porttimer.c (定时器驱动)
-      ↓
-移植 port.c (寄存器回调)
-      ↓
-去除断言依赖 -DNDEBUG
-      ↓
-eMBInit + eMBEnable 启动
-```
 
-> 详细移植步骤见 [[II_代码实操/Prot-Modbus移植]]
+> ⚠️ 运行时记得 `export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH` 或配置 `ldconfig`
 
 
 
-## 🚀 启动模板
+## 🚀 RTU 模式模板
 
 ```c
-#include "mb.h"
-#include "mbport.h"
-
-// 寄存器定义
-#define REG_INPUT_SIZE   10
-#define REG_HOLD_SIZE    10
-#define REG_COILS_SIZE   10
-#define REG_DISC_SIZE    10
-
-uint16_t REG_INPUT_BUF[REG_INPUT_SIZE]  = {0};
-uint16_t REG_HOLD_BUF[REG_HOLD_SIZE]   = {0};
-uint8_t  REG_COILS_BUF[REG_COILS_SIZE] = {0};
-uint8_t  REG_DISC_BUF[REG_DISC_SIZE]   = {0};
+#include <stdio.h>
+#include <modbus.h>
 
 int main(void)
 {
-    HAL_Init();
-    SystemClock_Config();
-    MX_USART2_UART_Init();
-    MX_TIM3_Init();
+    modbus_t *ctx;
+    uint16_t  hold_regs[10];
+    int       rc;
 
-    // eMBInit(模式, 从机地址, 端口, 波特率, 校验)
-    eMBInit(MB_RTU, 0x01, 0, 9600, MB_PAR_NONE);
-    eMBEnable();
-
-    while (1)
-    {
-        eMBPoll();   // 必须周期性调用
+    // 1. 创建 RTU 上下文 (/dev/ttyS1, 9600, 8N1)
+    ctx = modbus_new_rtu("/dev/ttyS1", 9600, 'N', 8, 1);
+    if (ctx == NULL) {
+        fprintf(stderr, "Failed to create ctx\n");
+        return -1;
     }
+
+    // 2. 设置从机地址
+    modbus_set_slave(ctx, 0x01);
+
+    // 3. 设置超时(秒+微秒)
+    modbus_set_response_timeout(ctx, 1, 0);
+
+    // 4. 打开串口
+    if (modbus_connect(ctx) == -1) {
+        fprintf(stderr, "Connect failed: %s\n", modbus_strerror(errno));
+        modbus_free(ctx);
+        return -1;
+    }
+
+    // 5. 读保持寄存器 (功能码 0x03)
+    rc = modbus_read_registers(ctx, 0, 10, hold_regs);
+    if (rc == -1) {
+        fprintf(stderr, "Read failed: %s\n", modbus_strerror(errno));
+    } else {
+        printf("Read %d regs OK\n", rc);
+    }
+
+    // 6. 写单个寄存器 (功能码 0x06)
+    modbus_write_register(ctx, 0, 0x1234);
+
+    // 7. 关闭与释放
+    modbus_close(ctx);
+    modbus_free(ctx);
+    return 0;
+}
+```
+
+### Makefile
+
+```makefile
+CROSS   = arm-linux-gnueabihf-
+CC      = $(CROSS)gcc
+CFLAGS  = -I/opt/libmodbus-v3s/include
+LDFLAGS = -L/opt/libmodbus-v3s/lib -lmodbus
+
+TARGET  = modbus_rtu_demo
+SRC     = main.c
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET)
+```
+
+
+
+## 🌐 TCP 模式模板
+
+```c
+#include <stdio.h>
+#include <modbus.h>
+
+int main(void)
+{
+    modbus_t *ctx;
+    uint16_t  regs[10];
+
+    // 1. 创建 TCP 上下文 (IP, 端口)
+    ctx = modbus_new_tcp("192.168.1.100", 502);
+    if (ctx == NULL) {
+        fprintf(stderr, "Failed to create ctx\n");
+        return -1;
+    }
+
+    // 2. 超时配置
+    modbus_set_response_timeout(ctx, 1, 0);
+
+    // 3. 连接
+    if (modbus_connect(ctx) == -1) {
+        fprintf(stderr, "Connect failed: %s\n", modbus_strerror(errno));
+        modbus_free(ctx);
+        return -1;
+    }
+
+    // 4. 读写操作 (与 RTU 完全相同)
+    modbus_read_registers(ctx, 0, 10, regs);
+    modbus_write_register(ctx, 0, 0x1234);
+
+    // 5. 释放
+    modbus_close(ctx);
+    modbus_free(ctx);
+    return 0;
 }
 ```
 
 
 
-## 📨 收发回调框架
+## 🔧 常用 API 速查
 
-四种寄存器对应四个回调,实现见 [[II_代码实操/Prot-Modbus移植#port文件]]:
+| 函数 | 功能 |
+|------|------|
+| `modbus_new_rtu` | 创建 RTU 上下文(设备/波特率/校验/数据位/停止位) |
+| `modbus_new_tcp` | 创建 TCP 上下文(IP/端口) |
+| `modbus_set_slave` | 设置从机地址 |
+| `modbus_set_response_timeout` | 设置响应超时 |
+| `modbus_connect` | 打开串口 / 建立 TCP 连接 |
+| `modbus_read_bits` | 读线圈 (0x01) |
+| `modbus_read_input_bits` | 读离散输入 (0x02) |
+| `modbus_read_registers` | 读保持寄存器 (0x03) |
+| `modbus_read_input_registers` | 读输入寄存器 (0x04) |
+| `modbus_write_bit` | 写单线圈 (0x05) |
+| `modbus_write_register` | 写单寄存器 (0x06) |
+| `modbus_write_bits` | 写多线圈 (0x0F) |
+| `modbus_write_registers` | 写多寄存器 (0x10) |
+| `modbus_close` | 关闭连接 |
+| `modbus_free` | 释放上下文内存 |
+| `modbus_strerror` | 错误码转字符串 |
 
-| 回调函数 | 对应功能码 | 操作 |
-|---------|-----------|------|
-| `eMBRegInputCB` | 0x04 | 读输入寄存器 |
-| `eMBRegHoldingCB` | 0x03/0x06/0x10 | 读写保持寄存器 |
-| `eMBRegCoilsCB` | 0x01/0x05/0x0F | 读写线圈 |
-| `eMBRegDiscreteCB` | 0x02 | 读离散输入 |
 
 
+## ⚙️ 串口配置要点
 
-## 🔧 发送功能实现
+V3s 上用 `/dev/ttyS*`,如果出现权限问题:
 
-> 主动发送 Modbus 请求帧,见 [[II_代码实操/Prot-Modbus发送功能实现]]
+```bash
+# 1. 查看串口设备
+ls /dev/ttyS*
 
+# 2. 赋权限
+chmod 666 /dev/ttyS1
 
-
-## ⚙️ 关键配置
-
-### 串口参数
-
-| 参数 | 推荐值 |
-|------|--------|
-| 波特率 | 9600 / 115200 |
-| 数据位 | 8 |
-| 停止位 | 1 / 2(奇偶校验时) |
-| 校验 | None / Even / Odd |
-
-### 3.5 字符超时
-
+# 3. 检查是否被其他程序占用
+fuser /dev/ttyS1
 ```
-T3.5 = 3.5 × (11 bit) / 波特率
-9600   → T3.5 ≈ 4.0 ms
-115200 → T3.5 ≈ 0.33 ms (协议规定最小 1.75 ms)
-```
+
+> 📌 485 方向控制:V3s 通常配合 GPIO 切换收发方向,需要在读写前拉高/拉低 RS485 的 DE/RE 引脚。
 
 
 
 ## 🐛 调试技巧
 
-- [ ] 用串口助手抓包,对照功能码确认帧结构
-- [ ] 检查从机地址是否冲突
-- [ ] 定时器中断频率是否满足 3.5 字符超时
-- [ ] `eMBPoll()` 是否在主循环中持续调用
-- [ ] CRC 校验失败 → 检查串口波特率/校验位配置
+- [ ] `dmesg | grep tty` 确认串口节点是否注册成功
+- [ ] 用 PC 端 Modbus Poll 作为从机验证主机程序
+- [ ] 检查波特率、校验位是否与从机一致
+- [ ] RTU 模式下 T3.5 超时由 libmodbus 自动处理
+- [ ] TCP 模式注意防火墙是否放行 502 端口
+- [ ] 多线程访问同一个 `modbus_t*` 需要加锁
 
 
 
 ## 📎 相关笔记
 
 - 理论: [[I_知识节点/Prot-Modbus]]
-- 移植: [[II_代码实操/Prot-Modbus移植]]
-- 发送: [[II_代码实操/Prot-Modbus发送功能实现]]
-- 项目应用: [[五、项目仓库/步进电机/App_MotorValue]]
-- ADAM-4150 控制: [[II_代码实操/基于Modbus_HEX指令的ADAM-4150的串口控制]]
+- 单片机移植版: [[II_代码实操/Prot-Modbus移植]]
+- 通信协议汇总: [[I_知识节点/Prot-Modbus]]
