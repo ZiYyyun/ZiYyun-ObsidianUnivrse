@@ -39,8 +39,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
 >  ```
 
 
-
-
 >CRC校验操作
 
 >校验第一组数据
@@ -99,8 +97,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
     return 1;
 ```
 计算完成后，把数据放到`buffer`里，最后释放内存
-
-
 
 ### 写操作
 
@@ -290,7 +286,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
     Int_BQ769_WriteRegister( BQ_PROTECT1, bq_register.Protect1.Protect1Byte);
 ```
 
-
 > `Protect2` 放电过流保护
 ```c
     // 放电过流阈值
@@ -299,7 +294,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
     bq_register.Protect2.Protect2Bit.OCD_DELAY = BMS_OCD_DELAY_1280ms;
     Int_BQ769_WriteRegister( BQ_PROTECT2, bq_register.Protect2.Protect2Byte);
 ```
-
 
 > `Protect3` 过压欠压保护延时
 ```c
@@ -310,7 +304,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
     Int_BQ769_WriteRegister( BQ_PROTECT3, bq_register.Protect3.Protect3Byte);
 ```
 
-
 > 配置过压保护阈值（OV）
 ```c
     // TI数据手册公式：
@@ -319,9 +312,6 @@ uint8_t *tmp_array = pvPortMalloc(sizes * 2);
     uint16_t ov = (OV_PROTECT * 1000.0f - offset) / gain;
     uint8_t ov_result = (ov >> 4) & 0xFF;
 ```
-
-
-
 
 > 配置欠压保护阈值（UV）
 ```c
