@@ -4,7 +4,7 @@ source: https://docs.espressif.com/projects/esp-idf/zh_CN/v6.0.2/esp32s3/api-ref
 author:
 published:
 created: 2026-07-06
-description: ESP32 I2S驱动编写
+description: esp32 HTTP客户端
 tags:
   - clippings
   - "#esp32"
