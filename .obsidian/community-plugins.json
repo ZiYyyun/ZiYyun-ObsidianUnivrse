@@ -4,5 +4,8 @@
   "dataview",
   "pdf-plus",
   "nutstore-sync",
-  "local-backup"
+  "local-backup",
+  "obsidian-style-settings",
+  "obsidian-icon-folder",
+  "mp-publisher"
 ]
