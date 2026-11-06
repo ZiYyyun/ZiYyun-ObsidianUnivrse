@@ -205,14 +205,14 @@ clean:
 
 ## 📨 发布与订阅 API
 
-| 函数 | 功能 |
-|------|------|
-| `mosquitto_publish` | 发布消息到指定主题 |
-| `mosquitto_subscribe` | 订阅主题 |
-| `mosquitto_unsubscribe` | 取消订阅 |
-| `mosquitto_message_callback_set` | 注册消息到达回调 |
-| `mosquitto_connect_callback_set` | 注册连接状态回调 |
-| `mosquitto_disconnect_callback_set` | 注册断开回调 |
+| 函数                                  | 功能        |
+| ----------------------------------- | --------- |
+| `mosquitto_publish`                 | 发布消息到指定主题 |
+| `mosquitto_subscribe`               | 订阅主题      |
+| `mosquitto_unsubscribe`             | 取消订阅      |
+| `mosquitto_message_callback_set`    | 注册消息到达回调  |
+| `mosquitto_connect_callback_set`    | 注册连接状态回调  |
+| `mosquitto_disconnect_callback_set` | 注册断开回调    |
 
 
 

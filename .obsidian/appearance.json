@@ -2,5 +2,8 @@
   "theme": "obsidian",
   "cssTheme": "AnuPpuccin",
   "textFontFamily": "Courier",
-  "interfaceFontFamily": "Courier New,Noto Sans Mono CJK HK"
+  "interfaceFontFamily": "Courier New,Noto Sans Mono CJK HK",
+  "enabledCssSnippets": [
+    "html-import"
+  ]
 }

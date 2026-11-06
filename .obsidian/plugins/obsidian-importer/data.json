@@ -1,0 +1,23 @@
+{
+  "secrets": {},
+  "outputLocations": {},
+  "outputSettings": {
+    "html": {
+      "folder": "HTML",
+      "attachments": {
+        "mode": "folder",
+        "path": "III_资源仓库"
+      },
+      "duplicates": "update",
+      "saveSourceId": true,
+      "idProperty": "html-source",
+      "template": "",
+      "titleTemplate": "{{title}}"
+    }
+  },
+  "onenoteAttachments": {},
+  "sourceFolders": {
+    "html": "C:\\Users\\15839\\Documents\\GitHub\\ZiYyun-ObsidianUnivrse\\五、项目仓库\\红石榴-车载智能后视镜"
+  },
+  "lastSourceFolder": "C:\\Users\\15839\\Documents\\GitHub\\ZiYyun-ObsidianUnivrse\\五、项目仓库\\红石榴-车载智能后视镜"
+}

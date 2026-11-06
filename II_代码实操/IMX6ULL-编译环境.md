@@ -5,7 +5,7 @@
 本文为ARMv7架构，故使用`armv7l-unknown-linux-gnueabihf-*`工具(PS:其他架构可在[https://github.com/NixOS/nixpkgs/blob/master/lib/systems/examples.nix]查到)
 
 创建
-```nix
+```c
 let
   pkgs = import <nixpkgs> {
     crossSystem = (import <nixpkgs/lib>).systems.examples.armv7l-hf-multiplatform;

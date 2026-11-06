@@ -1,0 +1,105 @@
+/* ============================================================
+   html-import —— HTML 导入笔记保真样式
+   挂载方式：笔记 frontmatter 写  cssclasses: [html-import]
+   生效范围：阅读视图 + 实时预览（仅对带该 class 的笔记生效）
+   换肤：只改 :root 这一组变量
+   ============================================================ */
+.html-import {
+  --hi-ink: #263633;
+  --hi-green: #176b50;
+  --hi-green-2: #22805f;
+  --hi-blue: #266486;
+  --hi-line: #dbe2df;
+  --hi-code-bg: rgba(120, 150, 140, 0.12);
+  --hi-th-bg: #eaf0eb;
+  --hi-th-fg: #42654c;
+  --hi-quote-bg: #eaf6ee;
+  --hi-quote-bd: #23815c;
+  --hi-quote-fg: #2b684f;
+}
+
+/* ---------- 标题 ---------- */
+.html-import.markdown-preview-view h1,
+.html-import.markdown-source-view .cm-header-1 { color: var(--hi-green); }
+.html-import.markdown-preview-view h2,
+.html-import.markdown-source-view .cm-header-2 {
+  color: var(--hi-green);
+  border-bottom: 1px solid var(--hi-line);
+  padding-bottom: 0.3em;
+}
+.html-import.markdown-preview-view h3,
+.html-import.markdown-source-view .cm-header-3 { color: var(--hi-green); }
+.html-import.markdown-preview-view h4,
+.html-import.markdown-source-view .cm-header-4 { color: var(--hi-green-2); }
+
+/* ---------- 链接 / 强调 ---------- */
+.html-import.markdown-preview-view a {
+  color: var(--hi-blue);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(38, 100, 134, 0.35);
+}
+.html-import.markdown-preview-view strong { color: var(--hi-green); }
+
+/* ---------- 行内代码 ---------- */
+.html-import.markdown-preview-view code:not(pre code),
+.html-import.markdown-source-view .cm-inline-code {
+  color: #23403a;
+  background: var(--hi-code-bg);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+/* ---------- 代码块 ---------- */
+.html-import.markdown-preview-view pre {
+  border: 1px solid var(--hi-line);
+  border-left: 3px solid var(--hi-green);
+  border-radius: 6px;
+}
+
+/* ---------- 表格 ---------- */
+.html-import.markdown-preview-view table {
+  border-collapse: collapse;
+  border: 1px solid var(--hi-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.html-import.markdown-preview-view th {
+  background: var(--hi-th-bg);
+  color: var(--hi-th-fg);
+  border: 1px solid var(--hi-line);
+}
+.html-import.markdown-preview-view td { border: 1px solid var(--hi-line); }
+.html-import.markdown-preview-view tbody tr:nth-child(even) {
+  background: rgba(120, 150, 140, 0.06);
+}
+
+/* ---------- 普通引用块 ---------- */
+.html-import.markdown-preview-view blockquote {
+  border-left: 4px solid var(--hi-quote-bd);
+  background: var(--hi-quote-bg);
+  color: var(--hi-quote-fg);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ---------- 自定义 callout：[!src] 源码依据（折叠）---------- */
+.callout[data-callout="src"] {
+  --callout-color: 35, 129, 92;
+  border-radius: 6px;
+}
+.callout[data-callout="src"] .callout-title {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.callout[data-callout="src"] pre {
+  border-left: 2px solid var(--hi-green);
+}
+
+/* ---------- 图片 / 分隔线 ---------- */
+.html-import.markdown-preview-view img {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--hi-line);
+}
+.html-import.markdown-preview-view hr {
+  border-top: 1px solid var(--hi-line);
+}
