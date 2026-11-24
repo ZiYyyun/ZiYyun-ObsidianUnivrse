@@ -5,13 +5,13 @@
 
 你先看普通结构体。
 
-```
+```cpp
 Network mqtt_network;
 ```
 
 访问成员：
 
-```
+```cpp
 mqtt_network.my_socket = 0;
 ```
 
